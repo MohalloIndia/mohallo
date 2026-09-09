@@ -1,0 +1,34 @@
+<svg width="240" height="280" viewBox="0 0 240 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="card-shadow1" x="0" y="0" width="240" height="280" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.06" />
+    </filter>
+    <linearGradient id="avatar-grad" x1="80" y1="50" x2="160" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF7A45" />
+      <stop offset="100%" stop-color="#E8622C" />
+    </linearGradient>
+  </defs>
+
+  <rect x="20" y="20" width="200" height="240" rx="16" fill="#FFFFFF" stroke="#E4E4DE" stroke-width="1.5" filter="url(#card-shadow1)" />
+  
+  <circle cx="120" cy="95" r="44" fill="#FFF5F0" />
+  <circle cx="120" cy="95" r="36" fill="url(#avatar-grad)" />
+  
+  <circle cx="120" cy="86" r="13" fill="#FFFFFF" />
+  <path d="M100 115C100 106 108 99 118 99H122C132 99 140 106 140 115V117H100V115Z" fill="#FFFFFF" />
+
+  <g transform="translate(142, 112)">
+    <rect width="32" height="32" rx="8" fill="#FFFFFF" stroke="#E4E4DE" stroke-width="1.5" />
+    <rect x="9" y="14" width="14" height="11" rx="2.5" fill="#E8622C" />
+    <path d="M12 14V11C12 8.8 13.8 7 16 7C18.2 7 20 8.8 20 11V14" stroke="#E8622C" stroke-width="2" stroke-linecap="round" />
+    <circle cx="16" cy="19.5" r="1.5" fill="#FFFFFF" />
+  </g>
+
+  <rect x="44" y="166" width="152" height="10" rx="5" fill="#E4E4DE" />
+  <rect x="44" y="186" width="100" height="8" rx="4" fill="#F3F3EE" />
+  <rect x="44" y="202" width="130" height="8" rx="4" fill="#F3F3EE" />
+
+  <circle cx="50" cy="228" r="6" fill="#15803D" />
+  <path d="M48 228L49.5 229.5L52.5 226.5" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+  <rect x="62" y="225" width="70" height="6" rx="3" fill="#A1A19A" />
+</svg>

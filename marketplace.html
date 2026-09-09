@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore Local Shops — Mohallo Neighbourhood Marketplace</title>
+  <meta name="description" content="Discover trusted neighbourhood bakeries, boutiques, grocery stores and local artisans." />
+  <link rel="icon" type="image/png" href="favicon.jpeg">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="payment-service.js"></script>
+</head>
+<body class="marketplace-body">
+
+  <!-- Locked Loading Logo -->
+  <div id="loader">
+    <div class="symbol-ring">
+      <span>π</span>
+      <span>∞</span>
+      <span>√</span>
+      <span>Σ</span>
+      <span>Δ</span>
+      <span>∫</span>
+    </div>
+    <p class="loader-text">mohallo</p>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo" aria-label="Mohallo Home">
+        <img src="images/mohallo-icon.png" alt="Mohallo Logo" class="logo-mark-img" />
+        mohallo
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="marketplace.html" class="active">Explore</a></li>
+        <li><a href="index.html#how-it-works">How It Works</a></li>
+        <li><a href="index.html#plans">Plans</a></li>
+        <li><a href="index.html#about">About</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="buyer-dashboard.html" class="btn btn-text">My Orders</a>
+        <button class="cart-trigger-btn" id="cart-btn" onclick="toggleCartDrawer()">
+          🛒 Cart (<span id="cart-count">0</span>)
+        </button>
+        <a href="dashboard.html" class="btn btn-outline">Seller Login</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MARKETPLACE HEADER (Screen 4 from Design Board) -->
+  <header class="market-header">
+    <div class="section-container">
+      <div class="market-header-inner">
+        <h1 class="market-headline">Explore local shops</h1>
+        <p class="market-sub">Discover trusted local businesses near you.</p>
+
+        <!-- Search Bar -->
+        <div class="market-search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="search-input" 
+            class="market-search-input" 
+            placeholder="Search shops, products, categories..." 
+            oninput="handleSearch(this.value)"
+          />
+        </div>
+
+        <!-- Category Filter Chips from Screen 4 -->
+        <div class="category-chips-row">
+          <button class="category-chip active" data-category="All" onclick="filterCategory('All', this)">All</button>
+          <button class="category-chip" data-category="Food & Drinks" onclick="filterCategory('Food & Drinks', this)">Food &amp; Drinks</button>
+          <button class="category-chip" data-category="Grocery" onclick="filterCategory('Grocery', this)">Grocery</button>
+          <button class="category-chip" data-category="Fashion" onclick="filterCategory('Fashion', this)">Fashion</button>
+          <button class="category-chip" data-category="Home" onclick="filterCategory('Home', this)">Home</button>
+          <button class="category-chip" data-category="More" onclick="filterCategory('More', this)">More</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SHOPS & PRODUCTS DIRECTORY -->
+  <main class="market-main">
+    <div class="section-container">
+      <!-- Shops Grid (Screen 4) -->
+      <div class="market-grid" id="shops-grid">
+        <!-- The Baker's Corner -->
+        <div class="shop-card" data-shop-id="shop-1" data-category="Food & Drinks" onclick="openShopModal('shop-1')">
+          <div class="shop-card-media">
+            <img src="images/shop-bakery.jpg" alt="The Baker's Corner" class="shop-card-img" />
+            <span class="shop-status-open">Open</span>
+          </div>
+          <div class="shop-card-content">
+            <div class="shop-card-header">
+              <h3 class="shop-card-title">The Baker's Corner</h3>
+              <span class="shop-card-rating">★ 4.8</span>
+            </div>
+            <p class="shop-card-meta">Bakery &middot; Sector 4</p>
+            <p class="shop-card-desc">Artisanal sourdough, freshly baked croissants and custom celebratory cakes.</p>
+            <div style="margin-top: 14px;">
+              <button class="btn btn-outline btn-block">View Shop &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GreenMart -->
+        <div class="shop-card" data-shop-id="shop-2" data-category="Grocery" onclick="openShopModal('shop-2')">
+          <div class="shop-card-media">
+            <img src="images/shop-grocery.jpg" alt="GreenMart" class="shop-card-img" />
+            <span class="shop-status-open">Open</span>
+          </div>
+          <div class="shop-card-content">
+            <div class="shop-card-header">
+              <h3 class="shop-card-title">GreenMart</h3>
+              <span class="shop-card-rating">★ 4.6</span>
+            </div>
+            <p class="shop-card-meta">Grocery &middot; Sector 7</p>
+            <p class="shop-card-desc">Farm-fresh organic vegetables, daily pantry staples and healthy cold-pressed oils.</p>
+            <div style="margin-top: 14px;">
+              <button class="btn btn-outline btn-block">View Shop &rarr;</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crafty Hands -->
+        <div class="shop-card" data-shop-id="shop-3" data-category="Home" onclick="openShopModal('shop-3')">
+          <div class="shop-card-media">
+            <img src="images/shop-crafts.jpg" alt="Crafty Hands" class="shop-card-img" />
+            <span class="shop-status-open">Open</span>
+          </div>
+          <div class="shop-card-content">
+            <div class="shop-card-header">
+              <h3 class="shop-card-title">Crafty Hands</h3>
+              <span class="shop-card-rating">★ 4.7</span>
+            </div>
+            <p class="shop-card-meta">Handicrafts &middot; Sector 11</p>
+            <p class="shop-card-desc">Hand-thrown studio pottery, decorative planters and woven jute storage baskets.</p>
+            <div style="margin-top: 14px;">
+              <button class="btn btn-outline btn-block">View Shop &rarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Navigation (Screen 4 from Design Board) -->
+  <div class="market-mobile-bottom-nav">
+    <a href="index.html" class="bottom-nav-item">
+      <span>🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="marketplace.html" class="bottom-nav-item active">
+      <span>🔍</span>
+      <span>Explore</span>
+    </a>
+    <button class="bottom-nav-item" onclick="toggleCartDrawer()">
+      <span>🛒</span>
+      <span>Cart (<span id="bottom-cart-count">0</span>)</span>
+    </button>
+    <a href="buyer-dashboard.html" class="bottom-nav-item">
+      <span>👤</span>
+      <span>Account</span>
+    </a>
+  </div>
+
+  <!-- SHOP DETAILS / PRODUCT CATALOG MODAL -->
+  <div class="modal-overlay" id="shop-catalog-modal" role="dialog" aria-modal="true">
+    <div class="modal-box modal-box-shop">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title" id="shop-modal-name">Shop Name</h3>
+          <p class="modal-sub" id="shop-modal-meta">Category &middot; Sector Location</p>
+        </div>
+        <button class="modal-close" onclick="closeShopModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 24px;">
+        <div class="shop-info-banner" id="shop-modal-info" style="margin-bottom: 20px; padding: 14px 18px; background: var(--bg-canvas); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <p style="font-size: 13px; color: var(--text-secondary);" id="shop-modal-desc">Local boutique store</p>
+        </div>
+
+        <h4 style="font-size: 16px; margin-bottom: 14px;">Products &amp; Items</h4>
+        <div class="shop-catalog-grid" id="shop-catalog-items">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAILS VIEW MODAL -->
+  <div class="modal-overlay" id="product-detail-modal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="prod-modal-title">Product Details</h3>
+        <button class="modal-close" onclick="closeProductModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;">
+          <div style="font-size: 48px; background: var(--bg-subtle); padding: 16px; border-radius: var(--radius-md);" id="prod-modal-icon">🏷️</div>
+          <div>
+            <h4 id="prod-modal-name" style="font-size: 18px; font-weight: 700;">Product Name</h4>
+            <p id="prod-modal-shop" class="text-muted" style="font-size: 13px;">Shop Name</p>
+            <p id="prod-modal-price" style="font-size: 20px; font-weight: 800; color: var(--brand-primary); margin-top: 6px;">₹0</p>
+          </div>
+        </div>
+        <p id="prod-modal-desc" style="font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 24px;">
+          Product description
+        </p>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding: 12px 16px; background: var(--bg-canvas); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+          <span style="font-weight: 600; font-size: 14px;">Quantity</span>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="btn btn-outline btn-sm" onclick="adjustModalProdQty(-1)">-</button>
+            <span id="prod-modal-qty" style="font-size: 16px; font-weight: 700; min-width: 24px; text-align: center;">1</span>
+            <button class="btn btn-outline btn-sm" onclick="adjustModalProdQty(1)">+</button>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" id="btn-add-from-modal" onclick="confirmAddProductToCart()">
+          Add to Cart &middot; <span id="prod-modal-total">₹0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOPPING CART SLIDE-OVER DRAWER -->
+  <div class="cart-backdrop" id="cart-backdrop" onclick="toggleCartDrawer()"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Your Cart">
+    <div class="cart-header">
+      <h3>Your Cart (<span id="drawer-cart-count">0</span>)</h3>
+      <button class="modal-close" onclick="toggleCartDrawer()">&times;</button>
+    </div>
+
+    <div class="cart-items-list" id="cart-items-list">
+      <p class="cart-empty-message">Your cart is empty. Add items from a neighbourhood shop to start an order.</p>
+    </div>
+
+    <div class="cart-footer">
+      <div class="cart-subtotal-row">
+        <span>Items Subtotal</span>
+        <strong id="cart-subtotal-amount">₹0</strong>
+      </div>
+      <div class="cart-subtotal-row" style="font-size: 14px; color: var(--text-secondary); font-weight: normal; margin-bottom: 8px;">
+        <span>Direct Local Delivery</span>
+        <span>₹30</span>
+      </div>
+      <div class="cart-subtotal-row" style="padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+        <span>Total</span>
+        <strong id="cart-total-amount" style="color: var(--brand-primary); font-size: 20px;">₹0</strong>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" id="btn-checkout" onclick="openCheckoutModal()" disabled style="margin-top: 16px;">
+        Proceed to Checkout &rarr;
+      </button>
+    </div>
+  </aside>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal-overlay" id="checkout-modal" role="dialog" aria-modal="true">
+    <div class="modal-box" style="max-width: 580px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Complete Your Local Order</h3>
+        <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 24px;">
+        <form id="checkout-form" onsubmit="handlePlaceOrder(event)">
+          <h4 style="font-size: 15px; margin-bottom: 12px;">Delivery Information</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="order-cust-name">Your Full Name <span class="required">*</span></label>
+              <input type="text" id="order-cust-name" value="Rohit Sharma" required />
+            </div>
+            <div class="form-group">
+              <label for="order-cust-phone">Mobile Phone <span class="required">*</span></label>
+              <input type="tel" id="order-cust-phone" value="9876543210" maxlength="10" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="order-cust-address">Delivery Address (Colony / Sector) <span class="required">*</span></label>
+            <input type="text" id="order-cust-address" value="Flat 402, Block B, Silver Palms Society, Sector 4" required />
+          </div>
+
+          <h4 style="font-size: 15px; margin: 20px 0 12px;">Payment Method</h4>
+          <div class="payment-radios-list" style="margin-bottom: 20px;">
+            <label class="payment-radio-row selected">
+              <input type="radio" name="order_payment_method" value="upi" checked />
+              <span>UPI (Google Pay, PhonePe, Paytm)</span>
+            </label>
+            <label class="payment-radio-row">
+              <input type="radio" name="order_payment_method" value="card" />
+              <span>Credit / Debit Card</span>
+            </label>
+            <label class="payment-radio-row">
+              <input type="radio" name="order_payment_method" value="cod" />
+              <span>Pay on Direct Delivery (Cash / UPI)</span>
+            </label>
+          </div>
+
+          <div style="background: var(--bg-canvas); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 20px;">
+            <div class="summary-line" style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
+              <span>Order Total (including ₹30 delivery)</span>
+              <strong id="checkout-final-amount">₹0</strong>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted);">🔒 Payments are verified server-side. Direct notification sent to merchant.</p>
+          </div>
+
+          <div style="display: flex; gap: 14px;">
+            <button type="button" class="btn btn-outline" onclick="closeCheckoutModal()">Back</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-order" style="flex: 1;">Confirm &amp; Place Order &rarr;</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="marketplace.js"></script>
+</body>
+</html>

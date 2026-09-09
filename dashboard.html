@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seller Dashboard — Mohallo Merchant Console</title>
+  <meta name="description" content="Manage your neighbourhood shop, product catalog, and direct customer orders." />
+  <link rel="icon" type="image/png" href="favicon.jpeg">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="plans.js"></script>
+</head>
+<body class="dashboard-body">
+
+  <!-- Locked Loading Logo -->
+  <div id="loader">
+    <div class="symbol-ring">
+      <span>π</span>
+      <span>∞</span>
+      <span>√</span>
+      <span>Σ</span>
+      <span>Δ</span>
+      <span>∫</span>
+    </div>
+    <p class="loader-text">mohallo</p>
+  </div>
+
+  <!-- AUTH GATE OVERLAY -->
+  <div class="auth-gate-overlay" id="auth-gate" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <a href="index.html" class="logo">
+          <img src="images/mohallo-icon.png" alt="Mohallo Logo" class="logo-mark-img" />
+          mohallo
+        </a>
+        <h3 style="margin-top: 10px;">Seller Sign In</h3>
+        <p>Enter your 10-digit registered mobile number and password to open your shop console.</p>
+      </div>
+
+      <form id="dash-login-form" onsubmit="handleDashboardLogin(event)">
+        <div class="form-group">
+          <label for="login-phone">Mobile Phone</label>
+          <input type="tel" id="login-phone" placeholder="10-digit mobile number" maxlength="10" required />
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Your password" required />
+        </div>
+
+        <div class="form-error" id="login-error" style="margin-bottom: 12px;"></div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-login">Sign In to Dashboard</button>
+      </form>
+
+      <div class="auth-card-footer">
+        <p>Don't have a shop yet? <a href="index.html" style="color: var(--brand-primary); font-weight: 600;">Register your shop &rarr;</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELLER DASHBOARD LAYOUT (10 TABS MATCHING V3 SPEC) -->
+  <div class="dash-layout" id="dashboard-app">
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" aria-label="Seller Dashboard Sidebar">
+      <div class="dash-sidebar-header">
+        <a href="index.html" class="logo">
+          <img src="images/mohallo-icon.png" alt="Mohallo" class="logo-mark-img" />
+          mohallo
+        </a>
+      </div>
+
+      <nav class="dash-nav">
+        <button class="dash-nav-item active" onclick="switchDashboardTab('overview')">
+          <span class="dash-nav-icon">📊</span>
+          <span>Overview</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('shop')">
+          <span class="dash-nav-icon">🏪</span>
+          <span>Shop</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('products')">
+          <span class="dash-nav-icon">🏷️</span>
+          <span>Products</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('orders')">
+          <span class="dash-nav-icon">📦</span>
+          <span>Orders</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('customers')">
+          <span class="dash-nav-icon">👥</span>
+          <span>Customers</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('analytics')">
+          <span class="dash-nav-icon">📈</span>
+          <span>Analytics</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('subscription')">
+          <span class="dash-nav-icon">💳</span>
+          <span>Subscription</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('payments')">
+          <span class="dash-nav-icon">🏦</span>
+          <span>Payments</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('autopilot')">
+          <span class="dash-nav-icon">⚡</span>
+          <span>Autopilot</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchDashboardTab('settings')">
+          <span class="dash-nav-icon">⚙️</span>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="dash-sidebar-footer">
+        <div class="dash-user-badge">
+          <span class="dash-user-avatar" id="sidebar-user-initial">S</span>
+          <div class="dash-user-info">
+            <p class="dash-user-name" id="sidebar-user-name">Shop Owner</p>
+            <p class="dash-user-plan" id="sidebar-user-plan">Starter Plan (₹199/mo)</p>
+          </div>
+        </div>
+        <button class="dash-logout-btn" onclick="handleLogout()" title="Logout">🚪</button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dash-main">
+      <!-- Top Bar -->
+      <header class="dash-topbar">
+        <div>
+          <h2 class="dash-topbar-title" id="dash-view-title">Overview</h2>
+          <p class="dash-topbar-sub" id="dash-view-sub">Here is what is happening with your shop today.</p>
+        </div>
+
+        <div class="dash-topbar-actions">
+          <select class="dash-period-select" id="dash-period-select" aria-label="Select Period">
+            <option value="today">Today</option>
+            <option value="this_month" selected>This Month</option>
+            <option value="this_year">This Year</option>
+          </select>
+          <a href="marketplace.html" class="btn btn-outline" id="btn-view-shop" target="_blank">View Shop &rarr;</a>
+        </div>
+      </header>
+
+      <!-- TAB 1: OVERVIEW (Screen 9) -->
+      <section class="dash-tab-panel active" id="panel-overview">
+        <!-- Next Best Action Card -->
+        <div class="dash-action-card" style="margin-bottom: 24px;">
+          <div class="dash-action-text">
+            <h4>💡 Next Recommendation: Share your store on WhatsApp</h4>
+            <p>Neighbourhood merchants who share their store link get 4x more orders in the first 48 hours.</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="copyStoreLink()">Copy &amp; Share Store Link</button>
+        </div>
+
+        <!-- 4 Metric Cards Row (Screen 9) -->
+        <div class="dash-metrics-grid">
+          <div class="metric-card">
+            <p class="metric-label">Total Orders</p>
+            <div class="metric-row">
+              <span class="metric-value" id="metric-orders-count">128</span>
+              <span class="metric-growth positive">▲ 18%</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <p class="metric-label">Gross Sales</p>
+            <div class="metric-row">
+              <span class="metric-value" id="metric-gross-sales">₹24,560</span>
+              <span class="metric-growth positive">▲ 23%</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <p class="metric-label">Store Visitors</p>
+            <div class="metric-row">
+              <span class="metric-value">342</span>
+              <span class="metric-growth positive">▲ 16%</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <p class="metric-label">Sales Commission</p>
+            <div class="metric-row">
+              <span class="metric-value" style="color: var(--success);">0%</span>
+              <span class="metric-growth positive" style="color: var(--success);">100% Kept</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Column Main Content -->
+        <div class="dash-overview-columns">
+          <!-- Left: Recent Orders -->
+          <div class="dash-card-box dash-orders-card">
+            <div class="dash-card-header-row">
+              <h3>Recent Orders</h3>
+              <button class="dash-link-btn" onclick="switchDashboardTab('orders')">View all orders</button>
+            </div>
+
+            <div class="dash-table-wrap">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                    <th style="text-align: right;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-recent-orders-tbody">
+                  <tr onclick="openOrderDetailModal('ORD1234')">
+                    <td><strong>#ORD1234</strong></td>
+                    <td><span class="badge-status-pill badge-warning">New Order</span></td>
+                    <td class="text-muted">2m ago</td>
+                    <td style="text-align: right; font-weight: 700;">₹450</td>
+                  </tr>
+                  <tr onclick="openOrderDetailModal('ORD1233')">
+                    <td><strong>#ORD1233</strong></td>
+                    <td><span class="badge-status-pill badge-info">Confirmed</span></td>
+                    <td class="text-muted">15m ago</td>
+                    <td style="text-align: right; font-weight: 700;">₹280</td>
+                  </tr>
+                  <tr onclick="openOrderDetailModal('ORD1232')">
+                    <td><strong>#ORD1232</strong></td>
+                    <td><span class="badge-status-pill badge-primary">Preparing</span></td>
+                    <td class="text-muted">1h ago</td>
+                    <td style="text-align: right; font-weight: 700;">₹360</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Shop Status & Top Products -->
+          <div class="dash-overview-right-col">
+            <!-- Shop Status Card from Screen 9 -->
+            <div class="dash-card-box dash-status-card">
+              <h3>Shop Status</h3>
+              <div class="shop-live-badge-row">
+                <span class="status-live-pill">● Your shop is live</span>
+              </div>
+              <div class="shop-domain-box">
+                <span class="shop-domain-url" id="dash-shop-url">myshop.mohallo.in</span>
+                <button class="btn btn-outline btn-sm" onclick="copyStoreLink()">Share Shop</button>
+              </div>
+            </div>
+
+            <!-- Top Products Card from Screen 9 -->
+            <div class="dash-card-box dash-top-products-card">
+              <h3>Top Products</h3>
+              <div class="top-products-thumbnails-row">
+                <div class="top-prod-item">
+                  <div class="top-prod-thumb">☕</div>
+                  <span class="top-prod-title">Ceramic Mug</span>
+                  <span class="top-prod-price">₹280</span>
+                </div>
+                <div class="top-prod-item">
+                  <div class="top-prod-thumb">🪴</div>
+                  <span class="top-prod-title">Clay Planter</span>
+                  <span class="top-prod-price">₹360</span>
+                </div>
+                <div class="top-prod-item">
+                  <div class="top-prod-thumb">🥣</div>
+                  <span class="top-prod-title">Serving Bowl</span>
+                  <span class="top-prod-price">₹450</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SHOP (Storefront Profile) -->
+      <section class="dash-tab-panel" id="panel-shop">
+        <div class="dash-card-box">
+          <div class="dash-card-header-row">
+            <h3>Storefront Information</h3>
+            <a href="marketplace.html" class="btn btn-outline btn-sm" target="_blank">View Live Storefront &rarr;</a>
+          </div>
+          <form onsubmit="handleSaveShopInfo(event)" style="max-width: 600px;">
+            <div class="form-group">
+              <label for="shop-edit-name">Shop Display Name</label>
+              <input type="text" id="shop-edit-name" value="Kavita's Artisan Pottery" required />
+            </div>
+            <div class="form-group">
+              <label for="shop-edit-category">Business Category</label>
+              <select id="shop-edit-category">
+                <option value="Bakery & Food">Bakery &amp; Food</option>
+                <option value="Grocery">Grocery</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Handicrafts" selected>Handicrafts &amp; Art</option>
+                <option value="Home">Home &amp; Decor</option>
+                <option value="Services">Local Services &amp; Repairs</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="shop-edit-address">Physical Shop Address</label>
+              <input type="text" id="shop-edit-address" value="Shop 12, Main Market, Sector 4" required />
+            </div>
+            <div class="form-group">
+              <label for="shop-edit-hours">Operating Hours</label>
+              <input type="text" id="shop-edit-hours" value="10:00 AM – 08:30 PM (Mon – Sun)" />
+            </div>
+            <div class="form-group">
+              <label for="shop-edit-about">About Shop (Shown to neighbours)</label>
+              <textarea id="shop-edit-about" rows="3">Handmade ceramic tableware, organic clay planters and bespoke gifts crafted in Sector 4.</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Save Store Changes</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB 3: PRODUCTS (Screen 10) -->
+      <section class="dash-tab-panel" id="panel-products">
+        <div class="dash-section-bar">
+          <div>
+            <h3>Product Catalog</h3>
+            <p class="text-muted">Manage item pricing, stock levels, and store listings.</p>
+          </div>
+          <div class="dash-section-actions">
+            <button class="btn btn-primary btn-sm" onclick="toggleAddProductForm()">+ Add Product</button>
+          </div>
+        </div>
+
+        <!-- Add Product Drawer -->
+        <div class="dash-card-box add-product-card" id="add-product-container" style="display: none;">
+          <h4>Add New Product to Shop</h4>
+          <form id="product-form" onsubmit="handleAddProduct(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="prod-name">Product Name <span class="required">*</span></label>
+                <input type="text" id="prod-name" placeholder="e.g. Handmade Ceramic Mug" required />
+              </div>
+              <div class="form-group">
+                <label for="prod-price">Price in INR (₹) <span class="required">*</span></label>
+                <input type="number" id="prod-price" placeholder="e.g. 280" min="1" step="1" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="prod-desc">Description</label>
+              <textarea id="prod-desc" rows="2" placeholder="Brief description of materials, flavor or features..."></textarea>
+            </div>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+              <button type="button" class="btn btn-outline btn-sm" onclick="toggleAddProductForm()">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm" id="btn-save-prod">Save Product</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Products Table from Screen 10 -->
+        <div class="dash-card-box">
+          <div class="dash-table-wrap">
+            <table class="dash-table" id="products-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Stock Status</th>
+                  <th>Orders</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="products-tbody">
+                <tr>
+                  <td>
+                    <div class="table-product-cell">
+                      <span class="table-thumb">☕</span>
+                      <div>
+                        <strong>Handmade Ceramic Mug</strong>
+                        <p class="text-muted" style="font-size: 11px;">Earthy glazed ceramic, 300ml</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="font-weight: 700; color: var(--brand-primary);">₹280</td>
+                  <td><span class="badge-status-pill badge-success">In Stock</span></td>
+                  <td>24</td>
+                  <td style="text-align: right;"><button class="btn btn-text btn-sm" style="color: var(--error);" onclick="alert('Product deleted')">Delete</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="table-product-cell">
+                      <span class="table-thumb">🪴</span>
+                      <div>
+                        <strong>Minimalist Clay Planter</strong>
+                        <p class="text-muted" style="font-size: 11px;">Handmade terracotta for indoor succulents</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="font-weight: 700; color: var(--brand-primary);">₹360</td>
+                  <td><span class="badge-status-pill badge-success">In Stock</span></td>
+                  <td>18</td>
+                  <td style="text-align: right;"><button class="btn btn-text btn-sm" style="color: var(--error);" onclick="alert('Product deleted')">Delete</button></td>
+                </tr>
+                <tr>
+                  <td>
+                    <div class="table-product-cell">
+                      <span class="table-thumb">🥣</span>
+                      <div>
+                        <strong>Terracotta Serving Bowl</strong>
+                        <p class="text-muted" style="font-size: 11px;">Organic oven-safe clay bowl</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="font-weight: 700; color: var(--brand-primary);">₹450</td>
+                  <td><span class="badge-status-pill badge-success">In Stock</span></td>
+                  <td>12</td>
+                  <td style="text-align: right;"><button class="btn btn-text btn-sm" style="color: var(--error);" onclick="alert('Product deleted')">Delete</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: ORDERS (6 STATES: New, Confirmed, Preparing, Ready, Completed, Cancelled) -->
+      <section class="dash-tab-panel" id="panel-orders">
+        <div class="dash-section-bar">
+          <div>
+            <h3>Orders Management</h3>
+            <p class="text-muted">Track and fulfill direct neighbourhood customer orders.</p>
+          </div>
+          <div class="category-chips-row">
+            <button class="category-chip active" onclick="filterSellerOrders('All', this)">All</button>
+            <button class="category-chip" onclick="filterSellerOrders('New', this)">New (1)</button>
+            <button class="category-chip" onclick="filterSellerOrders('Confirmed', this)">Confirmed (1)</button>
+            <button class="category-chip" onclick="filterSellerOrders('Preparing', this)">Preparing (1)</button>
+            <button class="category-chip" onclick="filterSellerOrders('Ready', this)">Ready</button>
+            <button class="category-chip" onclick="filterSellerOrders('Completed', this)">Completed</button>
+          </div>
+        </div>
+
+        <div class="dash-card-box">
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Date &amp; Time</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody-all">
+                <tr onclick="openOrderDetailModal('ORD1234')">
+                  <td><strong>#ORD1234</strong></td>
+                  <td>Rohit Sharma</td>
+                  <td>Ceramic Mug (1), Clay Planter (1)</td>
+                  <td class="text-muted">Today, 10:30 AM</td>
+                  <td><span class="badge-status-pill badge-warning">New Order</span></td>
+                  <td style="font-weight: 700;">₹690</td>
+                  <td style="text-align: right;"><button class="btn btn-outline btn-sm">Manage Order</button></td>
+                </tr>
+                <tr onclick="openOrderDetailModal('ORD1233')">
+                  <td><strong>#ORD1233</strong></td>
+                  <td>Pooja Verma</td>
+                  <td>Ceramic Mug (1)</td>
+                  <td class="text-muted">Today, 09:15 AM</td>
+                  <td><span class="badge-status-pill badge-info">Confirmed</span></td>
+                  <td style="font-weight: 700;">₹280</td>
+                  <td style="text-align: right;"><button class="btn btn-outline btn-sm">Manage Order</button></td>
+                </tr>
+                <tr onclick="openOrderDetailModal('ORD1232')">
+                  <td><strong>#ORD1232</strong></td>
+                  <td>Anil Kumar</td>
+                  <td>Clay Planter (1)</td>
+                  <td class="text-muted">Yesterday, 04:30 PM</td>
+                  <td><span class="badge-status-pill badge-primary">Preparing</span></td>
+                  <td style="font-weight: 700;">₹360</td>
+                  <td style="text-align: right;"><button class="btn btn-outline btn-sm">Manage Order</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: CUSTOMERS -->
+      <section class="dash-tab-panel" id="panel-customers">
+        <div class="dash-card-box">
+          <h3>Customer Directory</h3>
+          <p class="text-muted" style="margin-bottom: 20px;">Neighbours who have ordered directly from your digital shop.</p>
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>Total Orders</th>
+                  <th>Total Spent</th>
+                  <th>Last Order</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Rohit Sharma</strong></td>
+                  <td>+91 98765 43210</td>
+                  <td>3 orders</td>
+                  <td style="font-weight: 700;">₹1,450</td>
+                  <td class="text-muted">Today</td>
+                </tr>
+                <tr>
+                  <td><strong>Pooja Verma</strong></td>
+                  <td>+91 98112 34567</td>
+                  <td>1 order</td>
+                  <td style="font-weight: 700;">₹280</td>
+                  <td class="text-muted">Today</td>
+                </tr>
+                <tr>
+                  <td><strong>Anil Kumar</strong></td>
+                  <td>+91 98990 12345</td>
+                  <td>2 orders</td>
+                  <td style="font-weight: 700;">₹720</td>
+                  <td class="text-muted">Yesterday</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: ANALYTICS -->
+      <section class="dash-tab-panel" id="panel-analytics">
+        <div class="dash-metrics-grid">
+          <div class="metric-card">
+            <p class="metric-label">Monthly Gross Revenue</p>
+            <div class="metric-row"><span class="metric-value">₹24,560</span><span class="metric-growth positive">▲ 23%</span></div>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Average Order Value</p>
+            <div class="metric-row"><span class="metric-value">₹380</span><span class="metric-growth positive">▲ 5%</span></div>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Repeat Customer Rate</p>
+            <div class="metric-row"><span class="metric-value">42%</span><span class="metric-growth positive">▲ 12%</span></div>
+          </div>
+          <div class="metric-card">
+            <p class="metric-label">Storefront Pageviews</p>
+            <div class="metric-row"><span class="metric-value">1,240</span><span class="metric-growth positive">▲ 19%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 7: SUBSCRIPTION -->
+      <section class="dash-tab-panel" id="panel-subscription">
+        <div class="dash-card-box" style="max-width: 600px;">
+          <h3>Your Membership Plan</h3>
+          <p class="text-muted" style="margin-bottom: 20px;">Centrally controlled subscription for your digital storefront.</p>
+          <div style="background: var(--bg-canvas); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <strong>Starter Membership</strong>
+              <span class="badge-status-pill badge-success">Active &middot; Auto-renews</span>
+            </div>
+            <p style="font-size: 24px; font-weight: 800; color: var(--brand-primary); margin-bottom: 6px;">₹199<span style="font-size: 13px; font-weight: normal; color: var(--text-muted);">/month</span></p>
+            <p class="text-muted" style="font-size: 13px;">Includes 50 active listings, local search discovery, and 0% sales commission cuts.</p>
+          </div>
+          <button class="btn btn-outline" onclick="alert('Upgrade to Growth (₹399/mo) for unlimited items and verified badge!')">Upgrade to Growth (₹399/mo)</button>
+        </div>
+      </section>
+
+      <!-- TAB 8: PAYMENTS & PAYOUTS -->
+      <section class="dash-tab-panel" id="panel-payments">
+        <div class="dash-card-box" style="max-width: 600px;">
+          <h3>Direct Merchant Payouts</h3>
+          <p class="text-muted" style="margin-bottom: 20px;">Direct customer order payments are settled to your linked bank account via UPI / NEFT.</p>
+          <div class="form-group">
+            <label>Payout Status</label>
+            <p><span class="badge-status-pill badge-success">Bank Account Verified</span></p>
+          </div>
+          <div class="form-group">
+            <label>Settlement Destination</label>
+            <input type="text" value="HDFC Bank &middot;&middot;&middot;&middot; 4892 (IFSC: HDFC0001234)" disabled />
+          </div>
+          <div class="form-group">
+            <label>Settlement Schedule</label>
+            <input type="text" value="Daily Next-Day Settlement (T+1)" disabled />
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 9: AUTOPILOT -->
+      <section class="dash-tab-panel" id="panel-autopilot">
+        <div class="dash-card-box" style="max-width: 600px;">
+          <h3>Store Autopilot Automations</h3>
+          <p class="text-muted" style="margin-bottom: 20px;">Automated assistants to save time running your local business.</p>
+          
+          <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-subtle); cursor: pointer;">
+            <div>
+              <strong>Instant WhatsApp Order Alerts</strong>
+              <p class="text-muted" style="font-size: 12px;">Receive an alert on your phone whenever a customer orders.</p>
+            </div>
+            <input type="checkbox" checked style="width: 20px; height: 20px;" />
+          </label>
+
+          <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border-subtle); cursor: pointer;">
+            <div>
+              <strong>Automatic Store Hours</strong>
+              <p class="text-muted" style="font-size: 12px;">Automatically mark shop open/closed at scheduled times.</p>
+            </div>
+            <input type="checkbox" checked style="width: 20px; height: 20px;" />
+          </label>
+
+          <label style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0; cursor: pointer;">
+            <div>
+              <strong>Low Inventory Reminder</strong>
+              <p class="text-muted" style="font-size: 12px;">Alert when stock count falls below 3 units.</p>
+            </div>
+            <input type="checkbox" checked style="width: 20px; height: 20px;" />
+          </label>
+        </div>
+      </section>
+
+      <!-- TAB 10: SETTINGS -->
+      <section class="dash-tab-panel" id="panel-settings">
+        <div class="dash-card-box" style="max-width: 600px;">
+          <h3>Account &amp; Security Settings</h3>
+          <form onsubmit="alert('Settings updated'); return false;" style="margin-top: 16px;">
+            <div class="form-group">
+              <label>Merchant Name</label>
+              <input type="text" value="Priya Sharma" />
+            </div>
+            <div class="form-group">
+              <label>Phone Number (Login ID)</label>
+              <input type="tel" value="9876543210" disabled />
+            </div>
+            <div class="form-group">
+              <label>Update Password</label>
+              <input type="password" placeholder="New secure password" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Update Password</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ORDER DETAILS MODAL (Screen 11 with 6 States) -->
+  <div class="modal-overlay" id="order-detail-modal" role="dialog" aria-modal="true">
+    <div class="modal-box modal-box-order">
+      <div class="modal-header">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <h3 class="modal-title" id="order-modal-id">Order #ORD1234</h3>
+            <span class="badge-status-pill badge-warning" id="order-modal-status">New Order</span>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeOrderDetailModal()">&times;</button>
+      </div>
+
+      <div class="modal-body modal-body-order">
+        <div class="order-detail-grid">
+          <!-- Left: Customer & Items -->
+          <div class="order-left-col">
+            <div class="order-cust-box">
+              <p class="order-box-title">Customer</p>
+              <h4 id="order-modal-cust-name">Rohit Sharma</h4>
+              <p class="text-muted" id="order-modal-cust-phone">+91 98765 43210</p>
+              <p class="text-muted" style="font-size: 12px; margin-top: 4px;">Flat 402, Block B, Silver Palms Society, Sector 4</p>
+            </div>
+
+            <div class="order-items-box">
+              <p class="order-box-title">Items</p>
+              <div class="order-item-line">
+                <span>Handmade Ceramic Mug &times; 1</span>
+                <span>₹280</span>
+              </div>
+              <div class="order-item-line">
+                <span>Minimalist Clay Planter &times; 1</span>
+                <span>₹360</span>
+              </div>
+              <div class="order-totals-divider"></div>
+              <div class="order-item-line subtotal-line">
+                <span>Subtotal</span>
+                <span>₹640</span>
+              </div>
+              <div class="order-item-line subtotal-line">
+                <span>Delivery</span>
+                <span>₹50</span>
+              </div>
+              <div class="order-item-line grandtotal-line">
+                <strong>Total</strong>
+                <strong>₹690</strong>
+              </div>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <p class="order-box-title">Update Order State</p>
+              <div class="order-state-buttons-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="btn btn-outline btn-sm" onclick="setOrderState('Confirmed')">Confirm</button>
+                <button class="btn btn-outline btn-sm" onclick="setOrderState('Preparing')">Preparing</button>
+                <button class="btn btn-outline btn-sm" onclick="setOrderState('Ready')">Ready for Delivery</button>
+                <button class="btn btn-primary btn-sm" onclick="setOrderState('Completed')">Completed</button>
+              </div>
+              <button class="btn btn-text btn-sm" style="color: var(--error); margin-top: 8px; width: 100%; text-align: center;" onclick="setOrderState('Cancelled')">Cancel Order</button>
+            </div>
+          </div>
+
+          <!-- Right: Order Timeline from Screen 11 -->
+          <div class="order-right-col">
+            <p class="order-box-title">Order Timeline</p>
+            <div class="order-timeline">
+              <div class="timeline-step completed" id="timeline-step-1">
+                <div class="timeline-circle">●</div>
+                <div class="timeline-text">
+                  <p class="timeline-title">Order Placed</p>
+                  <p class="timeline-sub">Today, 10:30 AM</p>
+                </div>
+              </div>
+              <div class="timeline-step completed" id="timeline-step-2">
+                <div class="timeline-circle">●</div>
+                <div class="timeline-text">
+                  <p class="timeline-title">Payment Confirmed</p>
+                  <p class="timeline-sub">UPI verified server-side</p>
+                </div>
+              </div>
+              <div class="timeline-step active" id="timeline-step-3">
+                <div class="timeline-circle">●</div>
+                <div class="timeline-text">
+                  <p class="timeline-title">Order Preparing</p>
+                  <p class="timeline-sub">Merchant packing items</p>
+                </div>
+              </div>
+              <div class="timeline-step" id="timeline-step-4">
+                <div class="timeline-circle">○</div>
+                <div class="timeline-text">
+                  <p class="timeline-title">Order Delivered</p>
+                  <p class="timeline-sub">Direct neighbourhood delivery</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Portal — Mohallo Neighbourhood Shopping</title>
+  <meta name="description" content="Track your neighbourhood orders, discover nearby artisan shops, and manage your local shopping deliveries." />
+  <link rel="icon" type="image/png" href="favicon.jpeg">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="dashboard-body">
+
+  <!-- Locked Loading Logo -->
+  <div id="loader">
+    <div class="symbol-ring">
+      <span>π</span>
+      <span>∞</span>
+      <span>√</span>
+      <span>Σ</span>
+      <span>Δ</span>
+      <span>∫</span>
+    </div>
+    <p class="loader-text">mohallo</p>
+  </div>
+
+  <!-- BUYER WORKSPACE LAYOUT (Dedicated Customer Portal) -->
+  <div class="dash-layout" id="buyer-app">
+    <!-- Sidebar Navigation -->
+    <aside class="dash-sidebar" aria-label="Buyer Navigation Sidebar">
+      <div class="dash-sidebar-header">
+        <a href="index.html" class="logo">
+          <img src="images/mohallo-icon.png" alt="Mohallo" class="logo-mark-img" />
+          mohallo
+        </a>
+      </div>
+
+      <nav class="dash-nav">
+        <button class="dash-nav-item active" onclick="switchBuyerTab('home')">
+          <span class="dash-nav-icon">🏠</span>
+          <span>Home</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchBuyerTab('explore')">
+          <span class="dash-nav-icon">🔍</span>
+          <span>Explore Shops</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchBuyerTab('orders')">
+          <span class="dash-nav-icon">📦</span>
+          <span>My Orders</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchBuyerTab('cart')">
+          <span class="dash-nav-icon">🛒</span>
+          <span>Cart (<span id="buyer-nav-cart-count">0</span>)</span>
+        </button>
+        <button class="dash-nav-item" onclick="switchBuyerTab('profile')">
+          <span class="dash-nav-icon">👤</span>
+          <span>Profile &amp; Address</span>
+        </button>
+      </nav>
+
+      <div class="dash-sidebar-footer">
+        <div class="dash-user-badge">
+          <span class="dash-user-avatar" style="background-color: var(--text-primary);">N</span>
+          <div class="dash-user-info">
+            <p class="dash-user-name" id="buyer-display-name">Neighbour Buyer</p>
+            <p class="dash-user-plan">Local Customer</p>
+          </div>
+        </div>
+        <a href="index.html" class="dash-logout-btn" title="Back to Home">🚪</a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="dash-main">
+      <!-- Top Bar -->
+      <header class="dash-topbar">
+        <div>
+          <h2 class="dash-topbar-title" id="buyer-view-title">Welcome back, Neighbour! 👋</h2>
+          <p class="dash-topbar-sub" id="buyer-view-sub">Here is what is fresh and happening in your neighbourhood today.</p>
+        </div>
+
+        <div class="dash-topbar-actions">
+          <a href="marketplace.html" class="btn btn-primary btn-sm">Explore All Shops &rarr;</a>
+        </div>
+      </header>
+
+      <!-- TAB 1: HOME (Customer Hub) -->
+      <section class="dash-tab-panel active" id="buyer-panel-home">
+        <!-- Active Order Spotlight Card -->
+        <div class="dash-card-box" style="border-left: 4px solid var(--brand-primary);">
+          <div class="dash-card-header-row">
+            <div>
+              <span class="badge-status-pill badge-warning" style="margin-bottom: 6px;">In Progress</span>
+              <h3 style="margin-top: 4px;">Latest Order #ORD1234 &middot; The Baker's Corner</h3>
+              <p class="text-muted" style="font-size: 13px;">Estimated direct delivery: Today around 11:15 AM</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="switchBuyerTab('orders')">Track Order</button>
+          </div>
+          <div class="order-timeline-horizontal">
+            <div class="timeline-step completed">
+              <span class="step-dot">●</span>
+              <span class="step-text">Placed</span>
+            </div>
+            <div class="timeline-line completed"></div>
+            <div class="timeline-step completed">
+              <span class="step-dot">●</span>
+              <span class="step-text">Confirmed</span>
+            </div>
+            <div class="timeline-line completed"></div>
+            <div class="timeline-step active">
+              <span class="step-dot">●</span>
+              <span class="step-text">Preparing</span>
+            </div>
+            <div class="timeline-line"></div>
+            <div class="timeline-step">
+              <span class="step-dot">○</span>
+              <span class="step-text">Delivered</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nearby Neighbourhood Shops -->
+        <div class="dash-card-box">
+          <div class="dash-card-header-row">
+            <h3>Nearby Independent Stores</h3>
+            <a href="marketplace.html" class="dash-link-btn">View all 14 shops &rarr;</a>
+          </div>
+
+          <div class="buyer-nearby-grid">
+            <div class="buyer-shop-card" onclick="window.location.href='marketplace.html'">
+              <img src="images/shop-bakery.jpg" alt="The Baker's Corner" class="buyer-shop-img" />
+              <div class="buyer-shop-info">
+                <h4>The Baker's Corner</h4>
+                <p class="text-muted" style="font-size: 12px;">Bakery &middot; Sector 4 &middot; 450m away</p>
+                <span class="badge-status-pill badge-success" style="margin-top: 6px;">Open Now</span>
+              </div>
+            </div>
+
+            <div class="buyer-shop-card" onclick="window.location.href='marketplace.html'">
+              <img src="images/shop-grocery.jpg" alt="GreenMart" class="buyer-shop-img" />
+              <div class="buyer-shop-info">
+                <h4>GreenMart</h4>
+                <p class="text-muted" style="font-size: 12px;">Grocery &middot; Sector 7 &middot; 800m away</p>
+                <span class="badge-status-pill badge-success" style="margin-top: 6px;">Open Now</span>
+              </div>
+            </div>
+
+            <div class="buyer-shop-card" onclick="window.location.href='marketplace.html'">
+              <img src="images/shop-crafts.jpg" alt="Crafty Hands" class="buyer-shop-img" />
+              <div class="buyer-shop-info">
+                <h4>Crafty Hands</h4>
+                <p class="text-muted" style="font-size: 12px;">Studio Pottery &middot; Sector 11 &middot; 1.2km away</p>
+                <span class="badge-status-pill badge-success" style="margin-top: 6px;">Open Now</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Reorder Items -->
+        <div class="dash-card-box">
+          <div class="dash-card-header-row">
+            <h3>Quick Reorder Favourites</h3>
+          </div>
+          <div class="buyer-reorder-grid">
+            <div class="buyer-reorder-item">
+              <span style="font-size: 24px;">🥖</span>
+              <div style="flex-grow: 1;">
+                <strong>Artisanal Sourdough Loaf</strong>
+                <p class="text-muted" style="font-size: 12px;">The Baker's Corner &middot; ₹180</p>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="quickReorder('Artisanal Sourdough Loaf', 180, 'The Bakers Corner')">+ Add to Cart</button>
+            </div>
+
+            <div class="buyer-reorder-item">
+              <span style="font-size: 24px;">🥗</span>
+              <div style="flex-grow: 1;">
+                <strong>Farm Fresh Vegetable Box (3kg)</strong>
+                <p class="text-muted" style="font-size: 12px;">GreenMart &middot; ₹290</p>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="quickReorder('Farm Fresh Vegetable Box', 290, 'GreenMart')">+ Add to Cart</button>
+            </div>
+
+            <div class="buyer-reorder-item">
+              <span style="font-size: 24px;">☕</span>
+              <div style="flex-grow: 1;">
+                <strong>Handmade Ceramic Mug</strong>
+                <p class="text-muted" style="font-size: 12px;">Crafty Hands &middot; ₹280</p>
+              </div>
+              <button class="btn btn-outline btn-sm" onclick="quickReorder('Handmade Ceramic Mug', 280, 'Crafty Hands')">+ Add to Cart</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: EXPLORE (Redirect / Embed) -->
+      <section class="dash-tab-panel" id="buyer-panel-explore">
+        <div class="dash-card-box" style="text-align: center; padding: 48px 24px;">
+          <h3>Explore Local Neighbourhood Shops</h3>
+          <p class="text-muted" style="max-width: 500px; margin: 8px auto 24px;">
+            Discover verified bakeries, organic grocers, fashion boutiques, and local craft studios right in your colony.
+          </p>
+          <a href="marketplace.html" class="btn btn-primary btn-lg">Open Neighbourhood Marketplace &rarr;</a>
+        </div>
+      </section>
+
+      <!-- TAB 3: MY ORDERS -->
+      <section class="dash-tab-panel" id="buyer-panel-orders">
+        <div class="dash-card-box">
+          <div class="dash-card-header-row">
+            <h3>My Orders History</h3>
+          </div>
+
+          <div class="dash-table-wrap">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Shop</th>
+                  <th>Items Summary</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Total</th>
+                  <th style="text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="buyer-orders-tbody">
+                <tr>
+                  <td><strong>#ORD1234</strong></td>
+                  <td>The Baker's Corner</td>
+                  <td>Sourdough Loaf (1), Chocolate Croissants (2)</td>
+                  <td class="text-muted">Today, 10:30 AM</td>
+                  <td><span class="badge-status-pill badge-warning">Preparing</span></td>
+                  <td style="font-weight: 700;">₹450</td>
+                  <td style="text-align: right;"><button class="btn btn-outline btn-sm" onclick="alert('Order #ORD1234 is currently being prepared by The Bakers Corner.')">View Details</button></td>
+                </tr>
+                <tr>
+                  <td><strong>#ORD1208</strong></td>
+                  <td>GreenMart</td>
+                  <td>Fresh Veg Box (3kg), Organic Honey (500g)</td>
+                  <td class="text-muted">Aug 28, 04:15 PM</td>
+                  <td><span class="badge-status-pill badge-success">Delivered</span></td>
+                  <td style="font-weight: 700;">₹670</td>
+                  <td style="text-align: right;"><button class="btn btn-outline btn-sm" onclick="alert('Order #ORD1208 was successfully delivered on Aug 28.')">Receipt</button></td>
+                </tr>
+                <tr>
+                  <td><strong>#ORD1195</strong></td>
+                  <td>Crafty Hands</td>
+                  <td>Handmade Ceramic Mug (2)</td>
+                  <td class="text-muted">Aug 20, 11:00 AM</td>
+                  <td><span class="badge-status-pill badge-success">Delivered</span></td>
+                  <td style="font-weight: 700;">₹560</td>
+                  <td style="text-align: right;"><button class="btn btn-outline btn-sm" onclick="alert('Order #ORD1195 was delivered by Crafty Hands.')">Receipt</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CART -->
+      <section class="dash-tab-panel" id="buyer-panel-cart">
+        <div class="dash-card-box">
+          <div class="dash-card-header-row">
+            <h3>Active Shopping Cart</h3>
+            <button class="btn btn-text btn-sm" onclick="clearBuyerCart()">Clear Cart</button>
+          </div>
+
+          <div id="buyer-cart-container">
+            <div id="buyer-cart-list" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px;">
+              <!-- Populated by JS -->
+            </div>
+
+            <div class="buyer-cart-summary-box">
+              <div class="summary-line">
+                <span>Items Subtotal</span>
+                <span id="buyer-cart-subtotal">₹0</span>
+              </div>
+              <div class="summary-line">
+                <span>Local Direct Delivery</span>
+                <span>₹30</span>
+              </div>
+              <div class="summary-line total-line">
+                <strong>Total Amount</strong>
+                <strong id="buyer-cart-grandtotal" style="color: var(--brand-primary); font-size: 20px;">₹30</strong>
+              </div>
+
+              <div style="display: flex; gap: 16px; margin-top: 20px;">
+                <a href="marketplace.html" class="btn btn-outline" style="flex: 1;">Continue Shopping</a>
+                <button class="btn btn-primary" id="btn-buyer-checkout" style="flex: 1;" onclick="proceedToCheckout()">Proceed to Checkout &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: PROFILE & ADDRESS -->
+      <section class="dash-tab-panel" id="buyer-panel-profile">
+        <div class="dash-card-box">
+          <h3>Delivery Address &amp; Profile</h3>
+          <p class="text-muted" style="margin-bottom: 24px;">Used for fast neighbourhood delivery from local shops.</p>
+
+          <form onsubmit="handleSaveProfile(event)" style="max-width: 520px;">
+            <div class="form-group">
+              <label for="prof-name">Full Name</label>
+              <input type="text" id="prof-name" value="Rohit Sharma" required />
+            </div>
+
+            <div class="form-group">
+              <label for="prof-phone">Mobile Phone (for delivery coordination)</label>
+              <input type="tel" id="prof-phone" value="9876543210" maxlength="10" required />
+            </div>
+
+            <div class="form-group">
+              <label for="prof-address">Delivery Address</label>
+              <textarea id="prof-address" rows="3" required>Flat 402, Block B, Silver Palms Society, Sector 4</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="prof-instructions">Delivery Instructions (Optional)</label>
+              <input type="text" id="prof-instructions" placeholder="e.g. Leave with security guard if not home" />
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Save Profile Details</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="buyer-dashboard.js"></script>
+</body>
+</html>

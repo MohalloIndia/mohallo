@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mohallo — Your Local Business Deserves a Digital Shop</title>
+  <meta name="description"
+    content="Bring your neighbourhood shop online in under 5 minutes. Connect with local customers, take orders easily, and grow your business without high commissions." />
+  <link rel="icon" type="image/png" href="favicon.jpeg">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="plans.js"></script>
+  <script src="payment-service.js"></script>
+</head>
+
+<body>
+
+  <!-- ==========================================================================
+       NON-NEGOTIABLE REQUIREMENT:
+       KEEP THE CURRENT MOHALLO LOADING LOGO EXACTLY AS IT IS.
+       Do not redesign, replace, recolor, animate differently, or remove it.
+       ========================================================================== -->
+  <div id="loader">
+    <div class="symbol-ring">
+      <span>π</span>
+      <span>∞</span>
+      <span>√</span>
+      <span>Σ</span>
+      <span>Δ</span>
+      <span>∫</span>
+    </div>
+    <p class="loader-text">mohallo</p>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="logo" aria-label="Mohallo Home">
+        <img src="images/mohallo-icon.png" alt="Mohallo Logo" class="logo-mark-img" />
+        mohallo
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#home" class="active">Home</a></li>
+        <li><a href="marketplace.html">Explore</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#plans">Plans</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn btn-text" onclick="openBuyerAuthModal()">Buyer Login</button>
+        <a href="dashboard.html" class="btn btn-outline">Seller Login</a>
+        <button class="btn btn-primary" onclick="openSignupModal()">Create your shop</button>
+      </div>
+
+      <button id="menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu Drawer & Backdrop (Screen 3: Mobile Menu) -->
+  <div class="menu-backdrop" id="menu-backdrop" onclick="closeMobileMenu()"></div>
+  <aside class="mobile-menu" id="mobile-menu" aria-label="Mobile Navigation">
+    <div class="mobile-menu-header">
+      <a href="#home" class="logo">
+        <img src="images/mohallo-icon.png" alt="Mohallo Logo" class="logo-mark-img" />
+        mohallo
+      </a>
+      <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Close menu">&times;</button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="#home" class="mobile-nav-item active" onclick="closeMobileMenu()"><span class="nav-icon">🏠</span>
+          Home</a></li>
+      <li><a href="marketplace.html" class="mobile-nav-item" onclick="closeMobileMenu()"><span
+            class="nav-icon">🔍</span> Explore Local Shops</a></li>
+      <li><a href="#how-it-works" class="mobile-nav-item" onclick="closeMobileMenu()"><span class="nav-icon">📋</span>
+          How It Works</a></li>
+      <li><a href="#plans" class="mobile-nav-item" onclick="closeMobileMenu()"><span class="nav-icon">🏷️</span> Plans
+          &amp; Pricing</a></li>
+      <li><a href="#about" class="mobile-nav-item" onclick="closeMobileMenu()"><span class="nav-icon">ℹ️</span> About
+          Mohallo</a></li>
+    </ul>
+    <div class="mobile-menu-footer">
+      <button class="btn btn-outline btn-block" onclick="closeMobileMenu(); openBuyerAuthModal();">Buyer Login</button>
+      <a href="dashboard.html" class="btn btn-outline btn-block">Seller Login</a>
+      <button class="btn btn-primary btn-block" onclick="closeMobileMenu(); openSignupModal();">Create your
+        shop</button>
+    </div>
+  </aside>
+
+  <!-- HOMEPAGE HERO (MOHALLO V3: TWO USER PATHS + REAL 3D HERO) -->
+  <header class="hero" id="home">
+    <div class="hero-container">
+      <!-- Left Column: Headline, Copy, Distinct Dual Paths, 3 Benefits -->
+      <div class="hero-text">
+        <h1 class="hero-headline">Your local business<br />deserves a <span class="highlight">digital shop.</span></h1>
+        <p class="hero-sub">
+          Bring your neighbourhood shop online in under 5 minutes.
+          Connect with local customers, take orders easily,
+          and grow your business without high commissions.
+        </p>
+
+        <!-- Clear User Entry Paths: Seller & Buyer -->
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="openSignupModal()">
+            <span>Create your shop</span>
+            <span class="btn-arrow">&rarr;</span>
+          </button>
+          <a href="marketplace.html" class="btn btn-outline btn-lg">Explore local shops</a>
+        </div>
+
+
+
+        <!-- 3-Feature Value Row from Design Board -->
+        <div class="hero-features-row">
+          <div class="hero-feature-item">
+            <div class="hero-feature-icon">🏪</div>
+            <span>Your own digital shop</span>
+          </div>
+          <div class="hero-feature-item">
+            <div class="hero-feature-icon">📍</div>
+            <span>Reach local customers</span>
+          </div>
+          <div class="hero-feature-item">
+            <div class="hero-feature-icon">🛒</div>
+            <span>Simple online selling</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: MOHALLO LOCAL SHOP FRONT (Exact Design Board Illustration) -->
+      <div class="hero-visual">
+        <div class="hero-shop-wrapper" id="hero-shop-wrapper">
+          <div id="hero-3d-canvas-container" class="hero-3d-canvas" style="display: none;" aria-hidden="true"></div>
+          <picture>
+            <source srcset="images/hero-shop.svg" type="image/svg+xml">
+            <img id="hero-3d-fallback" src="images/hero-3d-shop.png" alt="Mohallo Local Digital Shop"
+              class="hero-shop-img" width="500" height="480" loading="eager" />
+          </picture>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SECTION 1: WHY LOCAL BUSINESSES NEED A DIGITAL SHOP -->
+  <section class="why" id="why">
+    <div class="section-container">
+      <div class="section-header-center">
+        <span class="section-label">Why Mohallo</span>
+        <h2 class="section-title">Built specifically for local merchants</h2>
+        <p class="section-sub">A straightforward digital home that respects your time, your customers, and your profits.
+        </p>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">💰</div>
+          <h3>Zero Heavy Commissions</h3>
+          <p>Keep 100% of your direct customer sales. Transparent monthly membership with no percentage deductions.</p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">⚡</div>
+          <h3>Fast 5-Minute Setup</h3>
+          <p>No developers, no complicated hosting. Register your shop, add your items, and share your link immediately.
+          </p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">📍</div>
+          <h3>Hyper-Local Discovery</h3>
+          <p>Connect with buyers in your exact neighbourhood or colony who prefer supporting independent local creators.
+          </p>
+        </div>
+
+        <div class="why-card">
+          <div class="why-icon">📱</div>
+          <h3>Clean Merchant Console</h3>
+          <p>Manage your product listings, view incoming orders, and track your store activity from any mobile phone or
+            desktop.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 2: HOW IT WORKS (MERCHANT JOURNEY) -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-container">
+      <div class="section-header-center">
+        <span class="section-label">Merchant Journey</span>
+        <h2 class="section-title">From setup to your first local order</h2>
+        <p class="section-sub">Four straightforward steps to bring your neighbourhood business online.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">01</div>
+          <h3>Create your shop</h3>
+          <p>Choose your store name, business category, and neighbourhood location in three guided steps.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">02</div>
+          <h3>List products &amp; services</h3>
+          <p>Add photos, descriptions, and clear pricing for everything you offer directly from your dashboard.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">03</div>
+          <h3>Get discovered locally</h3>
+          <p>Neighbourhood customers browsing Mohallo discover your storefront right in their area.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">04</div>
+          <h3>Receive direct orders</h3>
+          <p>Get direct customer orders with clear buyer contacts, delivery addresses, and verified payments.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: SUBSCRIPTION PLANS (Screen 8: Simple plans for every business) -->
+  <section class="plans" id="plans">
+    <div class="section-container">
+      <div class="plans-header-center">
+        <h2 class="section-title">Simple plans for every business</h2>
+        <p class="section-sub">Choose the plan that's right for your business.</p>
+
+        <!-- Monthly / Yearly Toggle from Screen 8 -->
+        <div class="plans-toggle-wrap">
+          <button class="plans-toggle-btn active" id="btn-toggle-monthly"
+            onclick="switchBillingPeriod('monthly')">Monthly</button>
+          <button class="plans-toggle-btn" id="btn-toggle-yearly" onclick="switchBillingPeriod('yearly')">Yearly (Save
+            15%)</button>
+        </div>
+      </div>
+
+      <div class="plans-grid">
+        <!-- Starter Plan (₹199/month) -->
+        <div class="plan-card" id="plan-card-199">
+          <p class="plan-name">Starter</p>
+          <div class="plan-price-row">
+            <span class="price-amount" id="price-starter">₹199</span>
+            <span class="price-period">/month</span>
+          </div>
+
+          <ul class="plan-features">
+            <li><span class="plan-dot">●</span> 10 Products</li>
+            <li><span class="plan-dot">●</span> Custom Shop Page</li>
+            <li><span class="plan-dot">●</span> Order Management</li>
+            <li><span class="plan-dot">●</span> Basic Analytics</li>
+            <li><span class="plan-dot">●</span> Email Support</li>
+          </ul>
+
+          <button class="btn btn-primary btn-block" onclick="openSignupModal('199')">Get Started</button>
+        </div>
+
+        <!-- Growth Plan (₹399/month) -->
+        <div class="plan-card" id="plan-card-399">
+          <p class="plan-name">Growth</p>
+          <div class="plan-price-row">
+            <span class="price-amount" id="price-growth">₹399</span>
+            <span class="price-period">/month</span>
+          </div>
+
+          <ul class="plan-features">
+            <li><span class="plan-dot">●</span> Unlimited Products</li>
+            <li><span class="plan-dot">●</span> Custom Domain</li>
+            <li><span class="plan-dot">●</span> Advanced Analytics</li>
+            <li><span class="plan-dot">●</span> Priority Support</li>
+            <li><span class="plan-dot">●</span> WhatsApp Support</li>
+          </ul>
+
+          <button class="btn btn-primary btn-block" onclick="openSignupModal('399')">Get Started</button>
+        </div>
+      </div>
+
+      <p class="plans-footer-note">All plans include secure payments and 24/7 platform reliability</p>
+    </div>
+  </section>
+
+  <!-- SECTION 4: ABOUT & MISSION -->
+  <section class="about" id="about">
+    <div class="section-container about-container">
+      <div class="about-text">
+        <span class="section-label">Our Mission</span>
+        <h2 class="section-title">Every neighbourhood has something worth discovering.</h2>
+        <p class="section-sub" style="margin-bottom: 24px;">
+          Behind every local shop is an entrepreneur with craft, dedication, and deep ties to the community.
+          Mohallo exists to give these independent sellers a modern, credible digital presence so local commerce
+          continues to thrive in every neighbourhood.
+        </p>
+
+        <div class="about-stats">
+          <div class="about-stat">
+            <p class="stat-number">₹199</p>
+            <p class="stat-label">Affordable starting plan</p>
+          </div>
+          <div class="about-stat">
+            <p class="stat-number">100%</p>
+            <p class="stat-label">Local neighbourhood focus</p>
+          </div>
+          <div class="about-stat">
+            <p class="stat-number">0%</p>
+            <p class="stat-label">Sales commission taken</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-banner-card">
+        <p class="about-banner-quote">
+          “Mohallo gave our bakery a professional storefront online. Neighbours now explore our daily treats and order
+          directly without confusion.”
+        </p>
+        <p class="about-banner-author">— Neighbourhood Merchant</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 5: FINAL CTA -->
+  <section class="final-cta">
+    <div class="section-container">
+      <div class="final-cta-box">
+        <h2>Your shop. Your neighbourhood. Your success.</h2>
+        <p>Join hundreds of local merchants growing their business with a digital storefront on Mohallo.</p>
+        <button class="btn btn-primary btn-lg" onclick="openSignupModal()">Create your shop today &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="#home" class="logo">
+            <img src="images/mohallo-icon.png" alt="Mohallo logo" class="logo-mark-img" />
+            mohallo
+          </a>
+          <p>
+            Your local business deserves a digital shop. Empowering independent neighbourhood merchants with modern
+            tools and discovery.
+          </p>
+        </div>
+
+        <div class="footer-links">
+          <p class="footer-heading">Platform</p>
+          <a href="#home">Home</a>
+          <a href="marketplace.html">Explore Shops</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#plans">Subscription Plans</a>
+        </div>
+
+        <div class="footer-links">
+          <p class="footer-heading">Portals</p>
+          <a href="dashboard.html">Seller Dashboard</a>
+          <a href="buyer-dashboard.html">Buyer Dashboard</a>
+          <a href="javascript:void(0)" onclick="openSignupModal()">Register Shop</a>
+          <a href="javascript:void(0)" onclick="openBuyerAuthModal()">Buyer Sign In</a>
+        </div>
+
+        <div class="footer-links">
+          <p class="footer-heading">Support</p>
+          <a href="mailto:support@mohallo.app">support@mohallo.app</a>
+          <a href="javascript:void(0)">Merchant Terms</a>
+          <a href="javascript:void(0)">Privacy Policy</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; <span id="year"></span> Mohallo. All rights reserved.</p>
+        <p>Sell with Heart. Connect with People. Grow Locally.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==========================================================================
+       SELLER ONBOARDING MODAL (Screens 5, 6, 7 from Design Board)
+       STEP 1 — PERSONAL INFORMATION
+       STEP 2 — SHOP INFORMATION
+       STEP 3 — PAYMENT & INTEGRATION
+       ========================================================================== -->
+  <div class="modal-overlay" id="signup-modal" role="dialog" aria-modal="true" aria-labelledby="onboarding-modal-title">
+    <div class="modal-box modal-box-onboarding">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="onboarding-logo-title">
+          <img src="images/mohallo-icon.png" alt="Mohallo" class="logo-mark-img" />
+          <span class="logo-text">mohallo</span>
+        </div>
+        <button class="modal-close" onclick="closeSignupModal()" aria-label="Close registration modal">&times;</button>
+      </div>
+
+      <!-- Stepper Header (Screens 5, 6, 7) -->
+      <div class="stepper-container">
+        <div class="stepper-steps">
+          <div class="stepper-step active" id="step-node-1">
+            <span class="step-circle" id="step-circle-1">01</span>
+            <span class="step-label">Personal Info</span>
+          </div>
+          <span class="stepper-divider"></span>
+          <div class="stepper-step" id="step-node-2">
+            <span class="step-circle" id="step-circle-2">02</span>
+            <span class="step-label">Shop Info</span>
+          </div>
+          <span class="stepper-divider"></span>
+          <div class="stepper-step" id="step-node-3">
+            <span class="step-circle" id="step-circle-3">03</span>
+            <span class="step-label">Payment</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body: 2-Column Layout matching Design Board -->
+      <div class="modal-body modal-body-onboarding">
+        <form id="signup-form" novalidate onsubmit="return false;">
+
+          <!-- STEP 1: PERSONAL INFORMATION (Screen 5) -->
+          <div class="onboarding-step active" id="step-panel-1">
+            <div class="onboarding-split-layout">
+              <!-- Left Column: Crisp Vector SVG Card -->
+              <div class="onboarding-graphic-col">
+                <div class="onboarding-card-visual">
+                  <img src="images/onboarding-step1.svg" alt="Personal Security Card" class="onboarding-card-img"
+                    width="240" height="280" />
+                </div>
+              </div>
+
+              <!-- Right Column: Form -->
+              <div class="onboarding-form-col">
+                <h3 class="onboarding-step-heading">Personal information</h3>
+                <p class="onboarding-step-sub">Let's start with your basic details.</p>
+
+                <div class="form-group">
+                  <label for="seller-name">Full name</label>
+                  <input type="text" id="seller-name" name="seller-name" placeholder="Enter your full name"
+                    autocomplete="name" required />
+                  <span class="form-error" id="error-name"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="seller-phone">Phone number</label>
+                  <input type="tel" id="seller-phone" name="seller-phone" placeholder="Enter your phone number"
+                    maxlength="10" autocomplete="tel" required />
+                  <span class="form-error" id="error-phone"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="seller-password">Password</label>
+                  <div class="password-input-wrap">
+                    <input type="password" id="seller-password" name="seller-password" placeholder="Create a password"
+                      minlength="6" autocomplete="new-password" required />
+                    <button type="button" class="password-toggle-btn"
+                      onclick="togglePasswordVisibility('seller-password', this)"
+                      aria-label="Toggle password visibility">👁️</button>
+                  </div>
+                  <span class="form-error" id="error-password"></span>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-block" onclick="handleStepNext()">Continue</button>
+                <div class="onboarding-alt-link">
+                  Already have an account? <a href="dashboard.html">Login</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 2: SHOP INFORMATION (Screen 6) -->
+          <div class="onboarding-step" id="step-panel-2">
+            <div class="onboarding-split-layout">
+              <!-- Left Column: Crisp Vector Storefront Card -->
+              <div class="onboarding-graphic-col">
+                <div class="onboarding-card-visual">
+                  <img src="images/onboarding-step2.svg" alt="Storefront Card" class="onboarding-card-img" width="240"
+                    height="280" />
+                </div>
+              </div>
+
+              <!-- Right Column: Form -->
+              <div class="onboarding-form-col">
+                <h3 class="onboarding-step-heading">Shop information</h3>
+                <p class="onboarding-step-sub">Tell us about your shop.</p>
+
+                <div class="form-group">
+                  <label for="shop-name">Shop name</label>
+                  <input type="text" id="shop-name" name="shop-name" placeholder="Enter shop name" required />
+                  <span class="form-error" id="error-shop"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="shop-category">Category</label>
+                  <select id="shop-category" name="shop-category" required>
+                    <option value="" disabled selected>Select category</option>
+                    <option value="Bakery & Food">Bakery &amp; Food</option>
+                    <option value="Grocery">Grocery</option>
+                    <option value="Fashion">Fashion &amp; Boutiques</option>
+                    <option value="Handicrafts">Handicrafts &amp; Art</option>
+                    <option value="Home">Home &amp; Decor</option>
+                    <option value="Services">Local Services &amp; Repairs</option>
+                    <option value="Other">Other Local Business</option>
+                  </select>
+                  <span class="form-error" id="error-category"></span>
+                </div>
+
+                <div class="form-group">
+                  <label for="seller-address">Address</label>
+                  <input type="text" id="seller-address" name="seller-address" placeholder="Enter your shop address"
+                    required />
+                  <span class="form-error" id="error-address"></span>
+                </div>
+
+                <div class="onboarding-dual-buttons">
+                  <button type="button" class="btn btn-outline" onclick="handleStepBack()">Back</button>
+                  <button type="button" class="btn btn-primary" onclick="handleStepNext()">Continue</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: PAYMENT & INTEGRATION (Screen 7) -->
+          <div class="onboarding-step" id="step-panel-3">
+            <div class="onboarding-split-layout">
+              <!-- Left Column: Choose Your Plan -->
+              <div class="onboarding-plan-col">
+                <h3 class="onboarding-step-heading" style="font-size: 16px; margin-bottom: 12px;">Choose your plan</h3>
+
+                <div class="onboarding-plans-list">
+                  <!-- Starter Card -->
+                  <div class="plan-choice-card selected" id="plan-choice-199" onclick="selectModalPlan('199')">
+                    <div class="plan-choice-header">
+                      <div>
+                        <strong>Starter</strong>
+                        <div class="plan-choice-price">₹199<span class="plan-choice-period">/month</span></div>
+                      </div>
+                      <input type="radio" name="plan_choice_radio" checked />
+                    </div>
+                    <ul class="plan-choice-features">
+                      <li>● 10 Products</li>
+                      <li>● Custom Shop Page</li>
+                      <li>● Order Management</li>
+                      <li>● Basic Analytics</li>
+                      <li>● Email Support</li>
+                    </ul>
+                  </div>
+
+                  <!-- Growth Card -->
+                  <div class="plan-choice-card" id="plan-choice-399" onclick="selectModalPlan('399')">
+                    <div class="plan-choice-header">
+                      <div>
+                        <strong>Growth</strong>
+                        <div class="plan-choice-price">₹399<span class="plan-choice-period">/month</span></div>
+                      </div>
+                      <input type="radio" name="plan_choice_radio" />
+                    </div>
+                    <ul class="plan-choice-features">
+                      <li>● Unlimited Products</li>
+                      <li>● Custom Domain</li>
+                      <li>● Advanced Analytics</li>
+                      <li>● Priority Support</li>
+                    </ul>
+                  </div>
+                </div>
+                <input type="hidden" id="selected-plan-id" value="199" />
+              </div>
+
+              <!-- Right Column: Payment Methods -->
+              <div class="onboarding-payment-col">
+                <h3 class="onboarding-step-heading" style="font-size: 16px; margin-bottom: 12px;">Payment methods</h3>
+
+                <div class="payment-radios-list">
+                  <label class="payment-radio-row selected">
+                    <input type="radio" name="payment_method_radio" value="upi" checked />
+                    <span>UPI (Google Pay, PhonePe, Paytm)</span>
+                  </label>
+                  <label class="payment-radio-row">
+                    <input type="radio" name="payment_method_radio" value="card" />
+                    <span>Card (Visa, Mastercard, RuPay)</span>
+                  </label>
+                  <label class="payment-radio-row">
+                    <input type="radio" name="payment_method_radio" value="netbanking" />
+                    <span>Net Banking</span>
+                  </label>
+                  <label class="payment-radio-row">
+                    <input type="radio" name="payment_method_radio" value="wallets" />
+                    <span>Wallets</span>
+                  </label>
+                  <label class="payment-radio-row">
+                    <input type="radio" name="payment_method_radio" value="paypal" />
+                    <span>PayPal</span>
+                  </label>
+                </div>
+
+                <div class="onboarding-dual-buttons" style="margin-top: 16px;">
+                  <button type="button" class="btn btn-outline" onclick="handleStepBack()">Back</button>
+                  <button type="button" class="btn btn-primary" id="btn-pay-continue" onclick="handleStepNext()">Pay
+                    &amp; Continue</button>
+                </div>
+
+                <p class="payment-security-subtext">🔒 Your payment is secure and encrypted.</p>
+                <div class="form-error" id="error-step3-global" style="text-align: center; margin-top: 6px;"></div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- SUCCESS STATE -->
+        <div class="modal-success" id="modal-success">
+          <div class="success-icon-large">✓</div>
+          <h3>Welcome to Mohallo!</h3>
+          <p id="success-message">Your shop registration and monthly membership payment have been verified. You can now
+            access your Seller Dashboard to add products and manage orders.</p>
+          <div style="display: flex; flex-direction: column; gap: 12px; max-width: 320px; margin: 0 auto;">
+            <a href="dashboard.html" class="btn btn-primary btn-block">Open Seller Dashboard</a>
+            <button class="btn btn-outline btn-block" onclick="closeSignupModal()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUYER AUTH MODAL (MOHALLO V3) -->
+  <div class="modal-overlay" id="buyer-auth-modal" role="dialog" aria-modal="true" aria-labelledby="buyer-modal-title">
+    <div class="modal-box modal-box-buyer-auth">
+      <div class="modal-header">
+        <h3 class="modal-title" id="buyer-modal-title">Customer Sign In</h3>
+        <button class="modal-close" onclick="closeBuyerAuthModal()"
+          aria-label="Close buyer login modal">&times;</button>
+      </div>
+
+      <div class="modal-body" style="padding: 24px;">
+        <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">
+          Sign in to track orders, manage deliveries, and save your favourite local neighbourhood shops.
+        </p>
+
+        <form id="buyer-auth-form" onsubmit="handleBuyerAuth(event)">
+          <div class="form-group">
+            <label for="buyer-phone">Mobile Phone Number</label>
+            <input type="tel" id="buyer-phone" placeholder="10-digit mobile number" maxlength="10" required />
+          </div>
+
+          <div class="form-group">
+            <label for="buyer-password">Password</label>
+            <input type="password" id="buyer-password" placeholder="Enter your password" required />
+          </div>
+
+          <div class="form-error" id="buyer-auth-error" style="margin-bottom: 12px;"></div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary btn-block">Sign In as Buyer &rarr;</button>
+            <a href="buyer-dashboard.html" class="btn btn-outline btn-block">Continue as Guest Buyer</a>
+          </div>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 13px; color: var(--text-secondary);">
+          Are you a shop owner? <a href="dashboard.html" style="color: var(--brand-primary); font-weight: 600;">Go to
+            Seller Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script src="hero-3d.js"></script>
+</body>
+
+</html>
